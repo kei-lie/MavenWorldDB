@@ -8,14 +8,18 @@ import atlantafx.base.theme.PrimerLight;
 import db.DatabaseConnection;
 import javafx.application.Application;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -63,12 +67,16 @@ public class WorldDB extends Application{
 		}
 		
 		btnSelect.setOnAction(e -> loadData());
-		//Šeit vēl jāturpina kopā...
+		btnInsert.setOnAction(e -> showInsertUpdateDialog(false));
+		btnUpdate.setOnAction(e -> showInsertUpdateDialog(true));
+		// btnDelete.setOnAction(e -> performDelete());
 		
 		tableSelector.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
 			boolean isSeperator = (newVal == null || newVal.startsWith("---"));
 			btnSelect.setDisable(isSeperator);
-			//Vēlāk jāpieliek pārējās pogas
+			btnInsert.setDisable(isSeperator);
+			btnUpdate.setDisable(isSeperator);
+			btnDelete.setDisable(isSeperator);
 		});
 		
 		tableSelector.getSelectionModel().select(1);
@@ -76,9 +84,9 @@ public class WorldDB extends Application{
 		
 		topBox.setPadding(new Insets(10));
 		
-		//Pēc tam jāpieliek bottomBox pārējām pogām
+		HBox bottomBox = new HBox(10, btnInsert, btnUpdate, btnDelete);
 		
-		VBox root = new VBox(10, topBox, table);
+		VBox root = new VBox(10, topBox, table, bottomBox);
 		stage.setScene(new Scene(root, 900, 600));
 		stage.setTitle("World DB APP");
 		stage.getIcons().add(new Image(getClass().getResourceAsStream("/icon.png")));
@@ -104,5 +112,92 @@ public class WorldDB extends Application{
 		alert.setContentText(msg);
 		alert.showAndWait();
 	}
+	
+	private void showInsertUpdateDialog(boolean isUpdate) {
+		String tableName = tableSelector.getValue();
+		if(tableName == null || tableName.startsWith("---")) return;
+		
+		if(databaseView.contains(tableName)) {
+			showAlert("Uzmanību!", "Izvēlētais objekts ir skats! Datus tajā mainīt nevar!");
+			return;
+		}
+		
+		loadData();
+		
+		Alert dialog = new Alert(Alert.AlertType.INFORMATION);
+		dialog.setTitle(isUpdate ? "UPDATE "+tableName : "INSERT "+tableName);
+		
+		dialog.getButtonTypes().setAll(ButtonType.OK, ButtonType.CANCEL);
+		
+		if(isUpdate) {
+			dialog.setHeaderText("Aizpildi laukus, lai atjauninātu:");
+		} else {
+			dialog.setHeaderText("Aizpildi laukus, lai ievietotu:");
+		}
+		
+		GridPane grid = new GridPane();
+		grid.setHgap(10);
+		grid.setVgap(10);
+		grid.setPadding(new Insets(20));
+		
+		List<String> activeColumns = new ArrayList<>();
+		List<TextField> textFields = new ArrayList<>();
+		
+		int gridRow = 0;
+		for(int i=0; i<currentColumns.size(); i++) {
+			String colName = currentColumns.get(i);
+			
+			if(!isUpdate && colName.equalsIgnoreCase("id")) {
+				continue;
+			}
+			
+			activeColumns.add(colName);
+			grid.add(new Label(colName+ ": "), 0, gridRow);
+			TextField tf = new TextField();
+			if(isUpdate && i == 0) {
+				tf.setPromptText("Ievadi esošu ID/Valsts kodu: ");
+			}
+			textFields.add(tf);
+			grid.add(tf, 1, gridRow);
+			gridRow++;
+		}
+		
+		dialog.getDialogPane().setContent(grid);
+		Button okButton = (Button) dialog.getDialogPane().lookupButton(ButtonType.OK);
+		okButton.addEventFilter(ActionEvent.ACTION, event -> {
+			try {
+				List<String> values = new ArrayList<>();
+				for(int i=0; i<textFields.size(); i++) {
+					String colName = activeColumns.get(i);
+					String rawValue = textFields.get(i).getText();
+					values.add(rawValue);
+				}
+				
+				if(isUpdate) {
+					int rowAffected = UpdateOperation.updateRecord(con, tableName, currentColumns, values);
+					
+					if(rowAffected > 0) {
+						showAlert("Veiksmīgi!", "Ieraksts tika atjaunināts!");
+						loadData();
+					} else {
+						String pkColumn = currentColumns.get(0);
+						String pkValue = values.get(0);
+						showAlert("Informācija", "Ieraksts ar " + pkColumn + " = " + pkValue + " netika atrasts!");
+						event.consume();
+					}
+				} else {
+					InsertOperation.insertRecord(con, tableName, activeColumns, values);
+					showAlert("Veiksmīgi!", "Ievietots jauns ieraksts!");
+					loadData();
+				}
+			} catch(Exception e) {
+				showAlert("SQL kļūda", e.getMessage());
+				event.consume();
+			}
+		});
+		dialog.showAndWait();
+	}
+	
+	// Nākamreiz būs delete!
 
 }
