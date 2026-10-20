@@ -20,6 +20,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import operations.SelectOperation;
+import operations.ViewManager;
 
 public class WorldDB extends Application{
 	private Connection con;
@@ -45,7 +46,7 @@ public class WorldDB extends Application{
 		
 		try {
 			con = DatabaseConnection.getConnection();
-			//databaseView = ViewManager.getDatabaseViews();
+			databaseView = ViewManager.getDatabaseViews(con);
 		}catch (Exception e) {
 			showAlert("Savienojuma kļūda: ", e.getMessage());
 		}
