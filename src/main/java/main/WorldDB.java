@@ -8,10 +8,16 @@ import atlantafx.base.theme.PrimerLight;
 import db.DatabaseConnection;
 import javafx.application.Application;
 import javafx.collections.ObservableList;
+import javafx.geometry.Insets;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.TableView;
+import javafx.scene.image.Image;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import operations.SelectOperation;
 
@@ -34,7 +40,7 @@ public class WorldDB extends Application{
 		launch(args);
 	}
 	@Override
-	public void start(Stage primaryStage) throws Exception {
+	public void start(Stage stage) throws Exception {
 		Application.setUserAgentStylesheet(new PrimerLight().getUserAgentStylesheet());
 		
 		try {
@@ -56,8 +62,27 @@ public class WorldDB extends Application{
 		}
 		
 		btnSelect.setOnAction(e -> loadData());
+		//Šeit vēl jāturpina kopā...
 		
-		//Šeit vēl jāturpina
+		tableSelector.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
+			boolean isSeperator = (newVal == null || newVal.startsWith("---"));
+			btnSelect.setDisable(isSeperator);
+			//Vēlāk jāpieliek pārējās pogas
+		});
+		
+		tableSelector.getSelectionModel().select(1);
+		HBox topBox = new HBox(10, new Label("Tabula/Skats:"), tableSelector, btnSelect);
+		
+		topBox.setPadding(new Insets(10));
+		
+		//Pēc tam jāpieliek bottomBox pārējām pogām
+		
+		VBox root = new VBox(10, topBox, table);
+		stage.setScene(new Scene(root, 900, 600));
+		stage.setTitle("World DB APP");
+		stage.getIcons().add(new Image(getClass().getResourceAsStream("/icon.png")));
+		stage.show();
+		loadData();
 	}
 	
 	private void loadData() {
