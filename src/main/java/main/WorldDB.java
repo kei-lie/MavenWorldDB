@@ -23,7 +23,9 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import operations.InsertOperations;
 import operations.SelectOperation;
+import operations.UpdateOperations;
 import operations.ViewManager;
 
 public class WorldDB extends Application{
@@ -174,7 +176,7 @@ public class WorldDB extends Application{
 				}
 				
 				if(isUpdate) {
-					int rowAffected = UpdateOperation.updateRecord(con, tableName, currentColumns, values);
+					int rowAffected = UpdateOperations.updateRecord(con, tableName, currentColumns, values);
 					
 					if(rowAffected > 0) {
 						showAlert("Veiksmīgi!", "Ieraksts tika atjaunināts!");
@@ -186,7 +188,7 @@ public class WorldDB extends Application{
 						event.consume();
 					}
 				} else {
-					InsertOperation.insertRecord(con, tableName, activeColumns, values);
+					InsertOperations.insertRecord(con, tableName, activeColumns, values);
 					showAlert("Veiksmīgi!", "Ievietots jauns ieraksts!");
 					loadData();
 				}
