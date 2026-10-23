@@ -1,6 +1,7 @@
 package main;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,6 +27,7 @@ import javafx.stage.Stage;
 import operations.InsertOperations;
 import operations.SelectOperation;
 import operations.UpdateOperations;
+import operations.DeleteOperations;
 import operations.ViewManager;
 
 public class WorldDB extends Application{
@@ -71,7 +73,7 @@ public class WorldDB extends Application{
 		btnSelect.setOnAction(e -> loadData());
 		btnInsert.setOnAction(e -> showInsertUpdateDialog(false));
 		btnUpdate.setOnAction(e -> showInsertUpdateDialog(true));
-		// btnDelete.setOnAction(e -> performDelete());
+		btnDelete.setOnAction(e -> performDelete());
 		
 		tableSelector.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
 			boolean isSeperator = (newVal == null || newVal.startsWith("---"));
@@ -200,6 +202,73 @@ public class WorldDB extends Application{
 		dialog.showAndWait();
 	}
 	
-	// Nākamreiz būs delete!
+	private void performDelete() {
+		String tableName = tableSelector.getValue();
+		if(tableName == null || tableName.startsWith("---")) return;
+		
+		if(databaseView.contains(tableName)) {
+			showAlert("Uzmanību!", "No skata dzēst nedrīkst!");
+			return;
+		}
+		
+		loadData();
+		Alert dialog = new Alert(Alert.AlertType.ERROR);
+		dialog.setTitle("DELETE FROM " + tableName);
+		
+		dialog.getButtonTypes().setAll(ButtonType.OK, ButtonType.CANCEL);
+		
+		String pkColumn = currentColumns.isEmpty() ? "ID" : currentColumns.get(0);
+		
+		dialog.setHeaderText("Ievadi " + pkColumn.toLowerCase() + " lai dzēstu: ");
+		
+		GridPane grid = new GridPane();
+		
+		grid.setHgap(10);
+		grid.setVgap(10);
+		grid.setPadding(new Insets(20));
+		List<String> pkColumns = new ArrayList<>();
+		List<TextField> textFields = new ArrayList<>();
+		
+		pkColumns.add(currentColumns.isEmpty() ? "ID" : currentColumns.get(0));
+		
+		for(int i=0; i<pkColumns.size(); i++) {
+			String colName = pkColumns.get(i);
+			grid.add(new Label(colName+": "), 0, i);
+			TextField tf = new TextField();
+			textFields.add(tf);
+			grid.add(tf, 1, i);
+		}
+		
+		dialog.getDialogPane().setContent(grid);
+		Button okButton = (Button)dialog.getDialogPane().lookupButton(ButtonType.OK);
+		okButton.addEventFilter(ActionEvent.ACTION, event -> {
+			
+			try {
+				List<String> validPkValues = new ArrayList<>();
+				for(int i=0; i<pkColumns.size(); i++) {
+					String columnName = pkColumns.get(i);
+					String rawValue = textFields.get(i).getText();
+					validPkValues.add(rawValue);
+				}
+				
+				int rowsAffected;
+				
+				rowsAffected = DeleteOperations.deleteRecord(con, tableName, 
+						pkColumns.get(0), validPkValues.get(0));
+				
+				if(rowsAffected > 0){
+					showAlert("Veiksmīgi dzēsts!", "Ieraksti dzēsti " + rowsAffected);
+				} else {
+					showAlert("Dzēšana nenotika!", "Norādītais ieraksts netika atrasts!");
+				}
+			}catch (IllegalArgumentException e) {
+				showAlert("Ievades datu kļūda!", e.getMessage());
+				event.consume();
+			} catch (SQLException e) {
+				showAlert("SQL kļūda!", e.getMessage());
+			}
+		});
+		dialog.showAndWait();
+	}
 
 }

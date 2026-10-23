@@ -1,5 +1,9 @@
-db\DatabaseConnection.class
 main\WorldDB.class
 operations\SelectOperation.class
 db\TestConnection.class
 main\Launcher.class
+operations\ViewManager.class
+operations\DeleteOperations.class
+db\DatabaseConnection.class
+operations\UpdateOperations.class
+operations\InsertOperations.class
