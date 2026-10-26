@@ -24,10 +24,10 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import operations.DeleteOperations;
 import operations.InsertOperations;
 import operations.SelectOperation;
 import operations.UpdateOperations;
-import operations.DeleteOperations;
 import operations.ViewManager;
 
 public class WorldDB extends Application{
@@ -61,6 +61,8 @@ public class WorldDB extends Application{
 		
 		tableSelector.getItems().add("--- Tabulas ---");
 		tableSelector.getItems().addAll("city");		//Pašai jāpieliek pārējās tabulas
+		tableSelector.getItems().addAll("country");
+		tableSelector.getItems().addAll("countrylanguage");
 		
 		if(databaseView.isEmpty()) {
 			tableSelector.getItems().add("--- NAV ATRASTS NEVIENS SKATS ---");

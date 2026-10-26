@@ -6,7 +6,7 @@ import java.sql.SQLException;
 
 public class DatabaseConnection {
 	private static final String URL = 
-			"jdbc:mysql://localhost:3306/world"
+			"jdbc:mysql://localhost:3307/world"
 			+ "?useSSL=false"
 			+ "&allowPublicKeyRetrieval=true"
 			+ "&serverTimeZone=Europe/Riga"
@@ -14,7 +14,7 @@ public class DatabaseConnection {
 			+ "&useUnicode=true";
 	
 	private static final String USER = "root";
-	private static final String PASSWORD = "KinichGlazer67";
+	private static final String PASSWORD = "Parole1";
 	
 	public static Connection getConnection() throws SQLException{
 		return DriverManager.getConnection(URL, USER, PASSWORD);

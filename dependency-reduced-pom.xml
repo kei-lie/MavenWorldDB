@@ -44,11 +44,11 @@
     </plugins>
   </build>
   <properties>
-    <maven.compiler.source>21</maven.compiler.source>
-    <atlantafx.version>2.0.1</atlantafx.version>
     <maven.compiler.target>21</maven.compiler.target>
+    <maven.compiler.source>21</maven.compiler.source>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <javafx.version>23.0.1</javafx.version>
+    <atlantafx.version>2.0.1</atlantafx.version>
     <mysql.version>9.2.0</mysql.version>
   </properties>
 </project>

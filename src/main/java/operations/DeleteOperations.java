@@ -16,4 +16,16 @@ public class DeleteOperations {
 			return ps.executeUpdate();
 			}
 	}
+		
+		public static int deleteRecordCountry(Connection con, String tableName, String pkColumn,
+				String pkValue) throws SQLException{
+		String sql = "DELETE FROM " + tableName + " WHERE " + pkColumn + " = ?";
+		
+		try (PreparedStatement ps = 
+				con.prepareStatement(sql)){
+			ps.setString(1, pkValue);
+			
+			return ps.executeUpdate();
+			}
+	}
 }
