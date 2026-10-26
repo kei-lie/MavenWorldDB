@@ -17,13 +17,14 @@ public class DeleteOperations {
 			}
 	}
 		
-		public static int deleteRecordCountry(Connection con, String tableName, String pkColumn,
+		public static int deleteRecordCountryL(Connection con, String tableName, String pkColumn, String valoda,
 				String pkValue) throws SQLException{
-		String sql = "DELETE FROM " + tableName + " WHERE " + pkColumn + " = ?";
+		String sql = "DELETE FROM " + tableName + " WHERE " + pkColumn + " = ? AND " + valoda + " = ?";
 		
 		try (PreparedStatement ps = 
 				con.prepareStatement(sql)){
 			ps.setString(1, pkValue);
+			ps.setString(2, valoda);
 			
 			return ps.executeUpdate();
 			}

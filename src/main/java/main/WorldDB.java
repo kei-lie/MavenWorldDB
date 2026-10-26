@@ -219,9 +219,16 @@ public class WorldDB extends Application{
 		
 		dialog.getButtonTypes().setAll(ButtonType.OK, ButtonType.CANCEL);
 		
-		String pkColumn = currentColumns.isEmpty() ? "ID" : currentColumns.get(0);
+		String pkColumn = null;
 		
-		dialog.setHeaderText("Ievadi " + pkColumn.toLowerCase() + " lai dzēstu: ");
+		if(!tableName.equals("countrylanguage")) {
+			pkColumn = currentColumns.isEmpty() ? "ID" : currentColumns.get(0);
+			dialog.setHeaderText("Ievadi " + pkColumn.toLowerCase() + " lai dzēstu: ");
+		} else {
+			dialog.setHeaderText("Ievadi nepieciešamos datus, lai dzēstu: ");
+		}
+		
+		
 		
 		GridPane grid = new GridPane();
 		
@@ -229,16 +236,32 @@ public class WorldDB extends Application{
 		grid.setVgap(10);
 		grid.setPadding(new Insets(20));
 		List<String> pkColumns = new ArrayList<>();
+		List<String> valodas = new ArrayList<>();
 		List<TextField> textFields = new ArrayList<>();
 		
 		pkColumns.add(currentColumns.isEmpty() ? "ID" : currentColumns.get(0));
 		
-		for(int i=0; i<pkColumns.size(); i++) {
-			String colName = pkColumns.get(i);
-			grid.add(new Label(colName+": "), 0, i);
-			TextField tf = new TextField();
-			textFields.add(tf);
-			grid.add(tf, 1, i);
+		
+		
+		if(tableName.equals("countrylanguage"))
+		{
+			
+			for(int i=0; i<2; i++) {
+				String colName = currentColumns.get(i);
+				valodas.add(currentColumns.get(i));
+				grid.add(new Label(colName+": "), 0, i);
+				TextField tf = new TextField();
+				textFields.add(tf);
+				grid.add(tf, 1, i);
+			}
+		} else {
+			for(int i=0; i<pkColumns.size(); i++) {
+				String colName = pkColumns.get(i);
+				grid.add(new Label(colName+": "), 0, i);
+				TextField tf = new TextField();
+				textFields.add(tf);
+				grid.add(tf, 1, i);
+			}
 		}
 		
 		dialog.getDialogPane().setContent(grid);
@@ -253,9 +276,12 @@ public class WorldDB extends Application{
 					validPkValues.add(rawValue);
 				}
 				
-				int rowsAffected;
+				int rowsAffected = 0;
 				
-				rowsAffected = DeleteOperations.deleteRecord(con, tableName, 
+				if(tableName.equals("countrylanguage")) {
+				rowsAffected = DeleteOperations.deleteRecordCountryL(con, tableName, 
+						valodas.get(0), valodas.get(1), validPkValues.get(0));
+				} else rowsAffected = DeleteOperations.deleteRecord(con, tableName, 
 						pkColumns.get(0), validPkValues.get(0));
 				
 				if(rowsAffected > 0){
